@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Permaweb No-Code Hello World</title>
+  <script src="https://cdn.twind.style" crossorigin></script>
+  <script src="https://unpkg.com/arweave@1.14.4/bundles/web.bundle.min.js"></script>
+</head>
+
+<body>
+  <main class="flex flex-col space-y-8 m-16">
+    <h1 class="text-3xl font-bold font-mono">Publish Data on the Weave</h1>
+    <div class="mt-8 w-[300px]">
+      <form>
+        <div>
+          <label for="OrderNotes" class="block text-sm font-medium text-gray-700">
+            Data
+          </label>
+
+          <textarea id="data" name="data"
+            class="mt-2 p-2 w-full rounded-lg border-2 border-gray-400 align-top shadow-sm sm:text-sm" rows="4"
+            placeholder="Enter some data..." required></textarea>
+        </div>
+        <div class="mt-8">
+          <button
+            class="inline-block rounded border border-black bg-black px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-black focus:outline-none focus:ring active:text-black"
+            type="submit">Publish</button>
+        </div>
+      </form>
+    </div>
+    <div id="result"></div>
+    <div id="link"></div>
+  </main>
+  <script type="module">
+    //import Arweave from 'https://unpkg.com/arweave'
+    import { ArweaveWebWallet } from 'https://unpkg.com/arweave-wallet-connector'
+    const arweave = Arweave.init({ host: 'arweave.net', port: 443, protocol: 'https' })
+
+    document.forms[0].addEventListener('submit', publish)
+
+    async function publish(e) {
+      e.preventDefault()
+      connect()
+        .then(_ => e.target.data.value)
+        .then(dispatch)
+        .then(reset)
+        .catch(error)
+    }
+
+    async function connect() {
+      const wallet = new ArweaveWebWallet({ name: 'Hello World' })
+      wallet.setUrl('arweave.app')
+      return wallet.connect()
+    }
+
+    async function dispatch(data) {
+      const tx = await arweave.createTransaction({ data })
+      tx.addTag('Content-Type', 'text/plain')
+      return globalThis.arweaveWallet.dispatch(tx)
+    }
+
+    async function reset(result) {
+      document.forms[0].reset()
+      document.getElementById('result').innerText = JSON.stringify(result)
+      document.getElementById('link').innerHTML = `<a class="link underline text-gray-400" target="_blank" href="https://arweave.net/${result.id}">View Data</a>`
+
+    }
+
+    function error(e) {
+      alert('Error Occurred trying to publish on the permaweb!')
+    }
+  </script>
+</body>
+
+</html>
