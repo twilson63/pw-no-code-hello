@@ -41,8 +41,10 @@
 
     async function publish(e) {
       e.preventDefault()
+      const getData = _ => e.target.data.value
+
       connect()
-        .then(_ => e.target.data.value)
+        .then(getData)
         .then(dispatch)
         .then(reset)
         .catch(error)
